@@ -107,8 +107,53 @@ lm.summary$coefficients
 plot(y=gasolin.consumption, x=car.weight, xlab="Car-Weight (US-Pounds)", ylab="Consumption (Miles/Gallon)", main="Buy Light-Weight Cars!") 
 abline (a=alpha, b=beta, col="red")
 
+#Monte Carlo Simulation
 
+#Sets the "seed" of the random number generators
+set.seed(109)
+#Number of Observations
+n<-50
+#Generate two explanatory variables and an intercwpt variable
+X.1<-rep(1, n) #Intercept
+X.2<-rnorm(n, mean=10, sd=1.5) #Draw realizations from a normal distribution
+X.3<-rt(n, df=5, ncp=2) #Draw realisations from a t-distribution
+X<-cbind(X.1, X.2, X.3) #Save as Nx3-dimentional matrix
 
+#Define the slope coefficients
+beta.vec<-c(1,-5,5)
+
+#Simulation of realization from the heteroscedastic error terms ei
+
+eps<- X.3*rnorm(n, mean=0, sd=1)
+
+#Plotting the heteroscedasticity in the error term
+ plot(y=eps, x=X.3, main="Realizations of the Heteroscedastic Error")
+
+ #Generate realization of the dependent variable yi
+ 
+ y<- X%*%beta.vec + eps
+ 
+ #Computing the OLS Estimates (beta-Vector)
+
+ myOLSFun<- function(y, x, add.intercept=FALSE)
+   {n<-length(y)
+   #Add intercept to x:
+   if(add.intercept){
+     Intercept<-rep(1, n)
+     x<-cbind(Intercept, x)
+   }
+
+ #Estimation of the slope parameters:
+ beta.hat.vec<-solve(t(X)%*%X) %*% t(X) %*% y
+ 
+ #Return the result
+ return (beta.hat.vec)
+ 
+ }
+ 
+ beta_hat <- myOLSFun(y, X, add.intercept = TRUE)
+ print(beta_hat)
+ plot(y = eps, x = X.3, main = "Realizations of the Heteroscedastic Error")
 
 
 
